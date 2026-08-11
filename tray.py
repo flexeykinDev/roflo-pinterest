@@ -136,10 +136,13 @@ def _run_locked(icon: pystray.Icon, label: str, fn) -> None:
                 else:
                     _set_state(icon, "idle")
                     _notify(icon, f"{label}: готово")
-            except Exception:
+            except Exception as e:
                 log.exception("Tray action '%s' failed", label)
                 _set_state(icon, "error")
-                _notify(icon, f"{label}: ошибка, смотри roflo.log")
+                # Include the error text itself in the notification, not
+                # just "check the log" — logging can go unnoticed in a
+                # windowed exe with no console attached.
+                _notify(icon, f"{label}: ошибка — {e}")
             finally:
                 icon.title = "Roflo Pinterest"
                 icon.update_menu()
