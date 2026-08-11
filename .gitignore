@@ -3,6 +3,12 @@ __pycache__/
 *.pyc
 .claude/settings.local.json
 
+# PyInstaller build output — built by scripts/build_exe.py, shipped via
+# GitHub Releases, not committed
+build/
+dist/
+*.spec
+
 # sensitive / local state — never commit these
 pinterest_auth.json
 pins_cache.json

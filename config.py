@@ -1,7 +1,21 @@
 """Central configuration for the Roflo Pinterest wallpaper tool."""
 import os
+import sys
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+def _base_dir() -> str:
+    if getattr(sys, "frozen", False):
+        # Running as a PyInstaller exe: __file__ would resolve inside the
+        # onefile temp extraction dir (_MEIPASS), which is wiped after
+        # every run, so auth/cache/log would never persist. Use a real
+        # per-user folder instead.
+        base = os.path.join(os.getenv("LOCALAPPDATA") or os.path.expanduser("~"), "RofloPinterest")
+        os.makedirs(base, exist_ok=True)
+        return base
+    return os.path.dirname(os.path.abspath(__file__))
+
+
+BASE_DIR = _base_dir()
 
 # --- Pinterest source ---
 FEED_URL = "https://www.pinterest.com/"

@@ -8,6 +8,7 @@ from typing import Dict
 
 from playwright.sync_api import sync_playwright
 
+import browser_setup
 import cache as cache_mod
 import config
 from logger_setup import get_logger
@@ -55,9 +56,17 @@ def _scrape_page(page, url: str) -> Dict[str, str]:
 def scrape_all() -> Dict[str, str]:
     """Merges pins across every target page, keeping the best-quality
     URL if the same pin_id turns up on more than one page."""
+    import os
+
+    if not os.path.exists(config.AUTH_FILE):
+        log.error("No saved Pinterest session (%s) — log in first (login.py, "
+                   "or 'Войти в Pinterest' in the tray menu)", config.AUTH_FILE)
+        return {}
+
     targets = [config.FEED_URL, *config.BOARD_URLS]
     merged: Dict[str, str] = {}
 
+    browser_setup.ensure_chromium()
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
         context = browser.new_context(storage_state=config.AUTH_FILE)
@@ -82,7 +91,12 @@ def scrape_all() -> Dict[str, str]:
     return merged
 
 
-def main() -> None:
+def main() -> bool:
+    import os
+
+    if not os.path.exists(config.AUTH_FILE):
+        return False
+
     store = cache_mod.load()
     before_pool = len(store["pool"])
     before_seen = len(store["seen"])
@@ -104,6 +118,7 @@ def main() -> None:
     )
     log.info(msg)
     print(msg)
+    return True
 
 
 if __name__ == "__main__":

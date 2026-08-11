@@ -11,6 +11,7 @@ import pystray
 from PIL import Image, ImageDraw, ImageFilter
 
 import cache as cache_mod
+import login
 import scraper
 import wallpaper
 from logger_setup import get_logger
@@ -36,10 +37,10 @@ def _lerp(c1: Tuple[int, int, int], c2: Tuple[int, int, int], t: float) -> Tuple
     return tuple(int(a + (b - a) * t) for a, b in zip(c1, c2))
 
 
-def _make_icon_image(state: str = "idle") -> Image.Image:
+def _make_icon_image(state: str = "idle", final_size: int = FINAL_SIZE) -> Image.Image:
     """Renders a crisp, professional-looking tray icon at 4x and downsamples
     it (cheap anti-aliasing — no jagged pixel edges on the circle/glyph)."""
-    size = FINAL_SIZE * SUPERSAMPLE
+    size = final_size * SUPERSAMPLE
     img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
 
@@ -91,7 +92,7 @@ def _make_icon_image(state: str = "idle") -> Image.Image:
     )
 
     img = img.filter(ImageFilter.SMOOTH_MORE)
-    return img.resize((FINAL_SIZE, FINAL_SIZE), Image.LANCZOS)
+    return img.resize((final_size, final_size), Image.LANCZOS)
 
 
 _ICON_CACHE = {state: _make_icon_image(state) for state in ("idle", "busy", "error")}
@@ -151,7 +152,11 @@ def _on_new_wallpaper(icon, item):
 
 
 def _on_rescan(icon, item):
-    _run_locked(icon, "Скан Pinterest", lambda: (scraper.main(), True)[1])
+    _run_locked(icon, "Скан Pinterest", scraper.main)
+
+
+def _on_login(icon, item):
+    _run_locked(icon, "Вход в Pinterest", login.login_via_browser)
 
 
 def _on_exit(icon, item):
@@ -164,6 +169,7 @@ def run() -> None:
     menu = pystray.Menu(
         pystray.MenuItem("Новые обои", _on_new_wallpaper, default=True),
         pystray.MenuItem("Обновить пул (scraper)", _on_rescan),
+        pystray.MenuItem("Войти в Pinterest", _on_login),
         pystray.Menu.SEPARATOR,
         pystray.MenuItem(lambda item: _pool_stats_text(), None, enabled=False),
         pystray.Menu.SEPARATOR,
