@@ -127,6 +127,68 @@ URL с `used: false`, скачивает, ставит, помечает `used: 
 трогая уже отмеченные, и чистит записи старше `MAX_AGE_DAYS`, которые так
 и не были показаны.
 
+## Где хранятся данные
+
+### Если используешь `.exe`
+
+Всё — в одной папке: `%LOCALAPPDATA%\RofloPinterest\`
+(то есть `C:\Users\<имя>\AppData\Local\RofloPinterest\`):
+
+| Файл / папка | Что это |
+|---|---|
+| `pinterest_auth.json` | сессия/куки Pinterest — ключ от твоего аккаунта, храни как пароль |
+| `pins_cache.json` | пул картинок: что ещё не показано, что уже показано |
+| `roflo.log` (+ `roflo.log.1`, `.2`, `.3`) | лог работы и ошибок, с ротацией |
+| `browsers\` | скачанный для Playwright Chromium (~150–300 МБ) |
+
+### Если используешь исходники (venv)
+
+`pinterest_auth.json`, `pins_cache.json`, `roflo.log` лежат прямо в
+папке проекта, рядом с `main.py` (см. `config.py`). Chromium для
+Playwright ставится не сюда, а в общий кэш `%LOCALAPPDATA%\ms-playwright\`
+— он используется всеми Playwright-проектами на машине, не только этим.
+
+## Как очистить / удалить
+
+**Если используешь `.exe`:**
+
+1. Выйди из приложения (правый клик по трею → «Выход»).
+2. Удали `RofloPinterest.exe`.
+3. Удали папку с данными — сотрёт сессию, кэш, лог и скачанный Chromium,
+   после этого от программы на компьютере ничего не останется:
+   ```powershell
+   Remove-Item -Recurse -Force "$env:LOCALAPPDATA\RofloPinterest"
+   ```
+4. Если добавлял ярлык в автозагрузку (`Win+R` → `shell:startup`) —
+   удали и его оттуда.
+
+Не обязательно удалять всё: чтобы просто разлогиниться, удали только
+`pinterest_auth.json` (при следующем запуске зайди заново через «Войти
+в Pinterest»); чтобы сбросить историю показанных картинок и собрать
+пул заново — удали только `pins_cache.json`.
+
+**Если используешь исходники:**
+
+1. Останови иконку трея / процесс.
+2. Если регистрировал задачи через `setup_task.py` — удали их:
+   ```powershell
+   schtasks /Delete /TN RofloPinterestScraper /F
+   schtasks /Delete /TN RofloPinterestWallpaper /F
+   ```
+3. Удали `pinterest_auth.json`, `pins_cache.json`, `roflo.log*` (или
+   всю папку проекта).
+4. Удали `venv\` — уберёт все Python-зависимости этого проекта.
+5. (Опционально) `%LOCALAPPDATA%\ms-playwright\` — общий кэш браузеров
+   Playwright, используется и другими проектами на машине, если такие
+   есть; удаляй, только если он больше не нужен нигде:
+   ```powershell
+   Remove-Item -Recurse -Force "$env:LOCALAPPDATA\ms-playwright"
+   ```
+
+Сама картинка обоев, которая уже стоит на рабочем столе, ни от кого не
+зависит — она лежит во временной папке Windows (`%TEMP%\pin_wallpaper.*`)
+и убирается штатной чисткой временных файлов.
+
 ## Приватность
 
 `pinterest_auth.json`, `pins_cache.json`, `roflo.log` — не коммить, они
