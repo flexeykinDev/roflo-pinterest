@@ -4,11 +4,23 @@
 Pinterest на рабочий стол Windows. Каждая картинка используется один раз
 за цикл — без повторов, пока пул не исчерпается.
 
+<p align="center">
+  <img src="assets/readme/icon-states.png" width="560" alt="Три состояния иконки в трее: обычное (красное), идёт действие (жёлтое), ошибка (серое)">
+</p>
+
+<sup><i>Иконка и меню на картинках ниже сгенерированы тем же кодом, что
+рисует их в реальном приложении (`tray.py`) — не скриншоты, но 1-в-1 по
+виду и содержанию.</i></sup>
+
 ## Готовый .exe (без Python)
 
 Не хочешь ставить Python и зависимости — скачай `RofloPinterest.exe` со
 [страницы релизов](https://github.com/flexeykinDev/roflo-pinterest/releases)
 и просто запусти его. Это трей-приложение "всё в одном":
+
+<p align="center">
+  <img src="assets/readme/workflow.png" width="820" alt="Скачай exe -> запусти -> войди в Pinterest -> обнови пул -> новые обои">
+</p>
 
 1. Запусти `RofloPinterest.exe` — появится иконка в трее.
 2. Правый клик по иконке → **"Войти в Pinterest"** — откроется браузер,
@@ -17,6 +29,10 @@ Pinterest на рабочий стол Windows. Каждая картинка и
    (первый раз может занять пару минут — докачивается браузер Chromium,
    ~150 МБ, один раз).
 4. Клик по иконке (или через меню) → **"Новые обои"** — ставит картинку.
+
+<p align="center">
+  <img src="assets/readme/menu-mockup.png" width="380" alt="Меню трея: Новые обои, Обновить пул, Войти в Pinterest, статистика пула, Выход">
+</p>
 
 Данные (сессия, кэш, лог) хранятся в `%LOCALAPPDATA%\RofloPinterest`.
 Чтобы приложение запускалось при входе в Windows — просто закинь ярлык
@@ -117,6 +133,7 @@ chromium`), поэтому размер exe остаётся разумным (~
 | `setup_task.py` | регистрация задач в Планировщике Windows |
 | `scripts/build_exe.py` | сборка `RofloPinterest.exe` (PyInstaller) |
 | `scripts/make_icon.py` | генерация `assets/roflo.ico` |
+| `scripts/make_readme_assets.py` | генерация картинок для этого README (`assets/readme/`) |
 
 ## Как работает пул без повторов
 
